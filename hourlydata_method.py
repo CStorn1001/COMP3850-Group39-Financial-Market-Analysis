@@ -41,6 +41,21 @@ import datetime
 import os
 import glob
 
+#This function is created to make it easier to get the hourly intervals for each fx pairings
+#0 to 23 for each day
+def hourly_intervals(curr_df):
+    hr_list = []
+    for i in range(0,24):
+        hr_list.append(curr_df[(curr_df['Time'].str.contains(f'{i}:00:00'))])
+    df = pd.concat(hr_list)
+    #sorting by the datetime and dropping all duplicates (if any)
+    return df.sort_values(by=['datetime'], ascending=True).drop_duplicates()
+#applying the functuon to the remaining dataframes
+# dfeuraud_hr = hourly_intervals(dfeuraud)
+# dfeurgbp_hr = hourly_intervals(dfeurgbp)
+# dfeurusd_hr = hourly_intervals(dfeurusd)
+# dfgbpusd_hr = hourly_intervals(dfgbpusd)
+# dfaudusd_hr = hourly_intervals(dfaudusd)
 directory = os.getcwd()
 filepath = f"{directory}\Hourly_data"
 dfaudusd_hr = pd.read_csv(f"{filepath}\dfaudusd_hr.csv")
