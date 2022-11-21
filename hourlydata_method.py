@@ -1,3 +1,5 @@
+########### NOTE do not execute this code ########################
+
 #data manipulation libraries
 import pandas as pd
 import numpy as np 
@@ -41,6 +43,38 @@ import datetime
 import os
 import glob
 
+#Data extraction function from notebook
+def data_extraction(curr):
+    directory = os.getcwd()
+    filepath = f"{directory}\FX"
+    file_list = []
+    for file in os.listdir(filepath):
+        d = os.path.join(filepath, file)
+        if os.path.isdir(d):
+            file_list.append(d)
+    dfs = []
+    for d in file_list:
+        csv_files = glob.glob(os.path.join(d, "*.csv"))
+        for f in csv_files:
+            if f"bar_Forex_{curr}" in f:
+                df = pd.read_csv(f)
+                dfs.append(df)
+    final_df = pd.concat(dfs)
+    return final_df
+#calling the function to get each currency dataframe
+dfaudusd = data_extraction('AUDUSD')
+dfeuraud = data_extraction('EURAUD')
+dfeurgbp = data_extraction('EURGBP')
+dfeurusd = data_extraction('EURUSD')
+dfgbpusd = data_extraction('GBPUSD')
+
+#iterate through all dataframes to break up field of datetime
+dfs= [dfaudusd, dfeuraud, dfeurgbp, dfeurusd, dfgbpusd]
+for i in range(len(dfs)):
+    dfs[i][['Date', 'Time']] = dfs[i]['datetime'].str.split(' ', expand=True)
+    dfs[i][['Time', 'Useless']]  = dfs[i]['Time'].str.split('+', expand=True)
+dfaudusd.head()
+
 #This function is created to make it easier to get the hourly intervals for each fx pairings
 #0 to 23 for each day
 def hourly_intervals(curr_df):
@@ -51,29 +85,19 @@ def hourly_intervals(curr_df):
     #sorting by the datetime and dropping all duplicates (if any)
     return df.sort_values(by=['datetime'], ascending=True).drop_duplicates()
 #applying the functuon to the remaining dataframes
-# dfeuraud_hr = hourly_intervals(dfeuraud)
-# dfeurgbp_hr = hourly_intervals(dfeurgbp)
-# dfeurusd_hr = hourly_intervals(dfeurusd)
-# dfgbpusd_hr = hourly_intervals(dfgbpusd)
-# dfaudusd_hr = hourly_intervals(dfaudusd)
+dfeuraud_hrr = hourly_intervals(dfeuraud)
+dfeurgbp_hrr = hourly_intervals(dfeurgbp)
+dfeurusd_hrr = hourly_intervals(dfeurusd)
+dfgbpusd_hrr = hourly_intervals(dfgbpusd)
+dfaudusd_hrr = hourly_intervals(dfaudusd)
+
+#store files as csv's so we can grab for the quick method:
+### Do note excecute!!!!!!
 directory = os.getcwd()
 filepath = f"{directory}\Hourly_data"
-dfaudusd_hr = pd.read_csv(f"{filepath}\dfaudusd_hr.csv")
-dfeuraud_hr = pd.read_csv(f"{filepath}\dfeuraud_hr.csv")
-dfeurgbp_hr = pd.read_csv(f"{filepath}\dfeurgbp_hr.csv")
-dfeurusd_hr = pd.read_csv(f"{filepath}\dfeurusd_hr.csv")
-dfgbpusd_hr = pd.read_csv(f"{filepath}\dfgbpusd_hr.csv")
-dfaudusd_hr.head()
-
-dfaudusd_hr = dfaudusd_hr.drop(dfaudusd_hr.columns[[0]], axis=1)
-dfeuraud_hr = dfeuraud_hr.drop(dfeuraud_hr.columns[[0]], axis=1)
-dfeurgbp_hr = dfeurgbp_hr.drop(dfeurgbp_hr.columns[[0]], axis=1)
-dfeurusd_hr = dfeurusd_hr.drop(dfeurusd_hr.columns[[0]], axis=1)
-dfgbpusd_hr = dfgbpusd_hr.drop(dfgbpusd_hr.columns[[0]], axis=1)
-dfaudusd_hr.head()
-
-dfs= [dfaudusd_hr, dfeuraud_hr, dfeurgbp_hr, dfeurusd_hr, dfgbpusd_hr]
-for i in range(len(dfs)):
-    dfs[i][['Date', 'Time']] = dfs[i]['datetime'].str.split(' ', expand=True)
-    dfs[i][['Time', 'Useless']]  = dfs[i]['Time'].str.split('+', expand=True)
+dfaudusd_hr = pd.to_csv(f"{filepath}\dfaudusd_hr.csv")
+dfeuraud_hr = pd.to_csv(f"{filepath}\dfeuraud_hr.csv")
+dfeurgbp_hr = pd.to_csv(f"{filepath}\dfeurgbp_hr.csv")
+dfeurusd_hr = pd.to_csv(f"{filepath}\dfeurusd_hr.csv")
+dfgbpusd_hr = pd.to_csv(f"{filepath}\dfgbpusd_hr.csv")
 dfaudusd_hr.head()
